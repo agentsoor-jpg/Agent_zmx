@@ -136,6 +136,14 @@ function extractPythonSymbols(content, filePath) {
 }
 
 // فهرسة ملف واحد
+function removeFile(relativePath) {
+    if (semanticIndex.files[relativePath]) {
+        delete semanticIndex.files[relativePath];
+        semanticIndex.symbols = semanticIndex.symbols.filter(s => s.file !== relativePath);
+        save();
+    }
+}
+
 function indexFile(relativePath) {
     const absolutePath = path.resolve(WORKSPACE_DIR, relativePath);
     
@@ -321,16 +329,24 @@ function getStats() {
     };
 }
 
+function reset() {
+    semanticIndex.symbols = [];
+    semanticIndex.files = {};
+    save();
+}
+
 // تحميل عند بدء التشغيل
 load();
 
 module.exports = {
     indexFile,
+    removeFile,
     indexAll,
     verifyParity,
     rebuild,
     getSymbolsForFile,
     searchSymbol,
     getStats,
-    semanticIndex
+    semanticIndex,
+    reset
 };

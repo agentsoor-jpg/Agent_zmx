@@ -49,6 +49,11 @@ function getFileHash(filePath) {
     }
 }
 
+function reset() {
+    ledger.entries = [];
+    save();
+}
+
 // تسجيل إنشاء ملف
 function recordCreate(relativePath) {
     const absolutePath = path.resolve(WORKSPACE_DIR, relativePath);
@@ -276,5 +281,6 @@ module.exports = {
     scanActualFiles,
     getStats,
     exportLedger,
-    ledger
+    ledger,
+    reset
 };

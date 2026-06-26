@@ -155,7 +155,10 @@
         <div class="input-section">
             <label for="goalInput">🎯 أدخل هدفك</label>
             <textarea id="goalInput" placeholder="مثال: أنشئ لي تطبيق ويب بسيط للتذكير بالمهام باستخدام React..."></textarea>
-            <button id="executeBtn" onclick="executeGoal()">🚀 تنفيذ</button>
+            <div style="display:flex; gap:12px;">
+                <button id="executeBtn" onclick="executeGoal()">🚀 تنفيذ</button>
+                <button id="chaosBtn" onclick="runChaosTests()" style="background:#f87171; color:#fff; padding:14px 32px; border:none; border-radius:10px; font-weight:700; font-size:1rem; cursor:pointer; transition:background 0.2s; align-self:flex-start;">🔥 اختبار التعذيب</button>
+            </div>
         </div>
 
         <div class="panel" id="strategyPanel" style="display:none;">
@@ -266,6 +269,44 @@
         goalInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) executeGoal();
         });
+
+        async function runChaosTests() {
+            const chaosBtn = document.getElementById('chaosBtn');
+            chaosBtn.disabled = true;
+            consoleOutput.innerHTML = '';
+            log('🔥 بدء اختبارات التعذيب...', 'error');
+            log('هذا سيختبر النظام بأقصى قسوة.', 'error');
+            log('...', 'info');
+
+            try {
+                const response = await fetch('/api/chaos-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                
+                log('✅ انتهت الاختبارات.', 'success');
+                log(`📊 النتيجة: ${result.passed}/${result.totalTests} نجح`, result.passed === result.totalTests ? 'success' : 'error');
+                log(`🏆 التقييم: ${result.grade}`, result.grade.includes('A') ? 'success' : 'error');
+                log(`⏱️ الزمن: ${result.totalDurationSeconds}s`, 'info');
+                log('---', 'info');
+                
+                if (result.results) {
+                    result.results.forEach(r => {
+                        const icon = r.status === 'passed' ? '✅' : r.status === 'crashed' ? '💀' : '❌';
+                        const duration = r.duration ? `${(r.duration/1000).toFixed(2)}s` : '';
+                        log(`${icon} ${r.testName} - ${duration}`, r.status === 'passed' ? 'success' : 'error');
+                    });
+                }
+                
+                log('🏁 انتهى التعذيب.', 'info');
+            } catch (error) {
+                log('💀 فشل الاختبار: ' + error.message, 'error');
+            } finally {
+                chaosBtn.disabled = false;
+            }
+        }
 
         log('النظام جاهز. أدخل هدفك واضغط "تنفيذ".', 'info');
     </script>

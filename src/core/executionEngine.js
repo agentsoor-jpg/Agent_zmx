@@ -2,10 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const ledger = require('../integrity/Ledger');
+const semanticIndex = require('../integrity/SemanticIndex');
 
 const WORKSPACE_DIR = path.resolve(process.cwd(), 'workspace_run');
 
 function validatePath(relativePath) {
+    if (relativePath.includes('..')) {
+        throw new Error("Path traversal detected! '..' is not allowed in paths.");
+    }
     const absolutePath = path.resolve(WORKSPACE_DIR, relativePath);
     if (!absolutePath.startsWith(WORKSPACE_DIR)) {
         throw new Error("Path traversal detected! Cannot access files outside workspace_run.");
@@ -28,8 +32,9 @@ function createFile(relativePath, content) {
             fs.mkdirSync(dir, { recursive: true });
         }
         fs.writeFileSync(absolutePath, content, 'utf8');
-        // سجل في الـ ledger
-        ledger.recordCreate(relativePath);
+        const normRel = path.relative(WORKSPACE_DIR, absolutePath);
+        ledger.recordCreate(normRel);
+        semanticIndex.indexFile(normRel);
         return { status: "success", path: absolutePath };
     } catch (error) {
         return { status: "error", error: error.message };
@@ -56,8 +61,6 @@ function createDirectory(relativePath) {
         if (!fs.existsSync(absolutePath)) {
             fs.mkdirSync(absolutePath, { recursive: true });
         }
-        // سجل في الـ ledger
-        ledger.recordCreate(relativePath);
         return { status: "success", path: absolutePath };
     } catch (error) {
         return { status: "error", error: error.message };
@@ -67,6 +70,11 @@ function createDirectory(relativePath) {
 function isCommandAllowed(command) {
     const allowedCommands = ['node', 'npm', 'npx', 'python', 'python3', 'pip', 'pip3', 'ls', 'cat', 'echo', 'mkdir'];
     const firstWord = command.trim().split(/\s+/)[0];
+    
+    // منع تجاوزات
+    if (firstWord === 'node' && command.includes('-e')) return false;
+    if (/[&|;><]/.test(command)) return false;
+    
     return allowedCommands.includes(firstWord);
 }
 
@@ -125,8 +133,9 @@ function deleteFile(relativePath) {
         const absolutePath = validatePath(relativePath);
         if (fs.existsSync(absolutePath)) {
             fs.unlinkSync(absolutePath);
-            // سجل في الـ ledger
-            ledger.recordDelete(relativePath);
+            const normRel = path.relative(WORKSPACE_DIR, absolutePath);
+            ledger.recordDelete(normRel);
+            semanticIndex.removeFile(normRel);
         }
         return { status: "success", path: absolutePath };
     } catch (error) {
@@ -138,6 +147,20 @@ function deleteDirectory(relativePath) {
     try {
         const absolutePath = validatePath(relativePath);
         if (fs.existsSync(absolutePath)) {
+            function walk(dir) {
+                const items = fs.readdirSync(dir);
+                for (const item of items) {
+                    const fullPath = path.join(dir, item);
+                    if (fs.statSync(fullPath).isDirectory()) {
+                        walk(fullPath);
+                    } else {
+                        const rel = path.relative(WORKSPACE_DIR, fullPath);
+                        ledger.recordDelete(rel);
+                        semanticIndex.removeFile(rel);
+                    }
+                }
+            }
+            walk(absolutePath);
             fs.rmSync(absolutePath, { recursive: true, force: true });
         }
         return { status: "success", path: absolutePath };

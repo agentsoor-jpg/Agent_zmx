@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const strategicController = require('./src/control/StrategicController');
+const ChaosEngine = require('./src/testing/ChaosEngine');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,6 +46,26 @@ app.get('/api/status', (req, res) => {
 // الصفحة الرئيسية
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// نقطة تشغيل الاختبارات التدميرية
+app.post('/api/chaos-test', async (req, res) => {
+    try {
+        const chaos = new ChaosEngine();
+        const results = await chaos.runAll();
+        
+        res.json({
+            status: "completed",
+            message: "تم الانتهاء من جميع اختبارات التعذيب.",
+            ...results
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "فشل تشغيل الاختبارات.",
+            error: error.message
+        });
+    }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
