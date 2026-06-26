@@ -4,6 +4,10 @@ const strategicController = require('./src/control/StrategicController');
 const ChaosEngine = require('./src/testing/ChaosEngine');
 const UniversalFileManager = require('./src/universal/UniversalFileManager');
 
+const PackageManager = require('./src/packages/PackageManager');
+const TaskScheduler = require('./src/tasks/TaskScheduler');
+const TaskOrchestrator = require('./src/tasks/TaskOrchestrator');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -151,6 +155,67 @@ app.get('/api/universal/capabilities', (req, res) => {
         status: "success",
         capabilities: ufm.getCapabilities()
     });
+});
+
+// ========== إدارة الحزم ==========
+app.post('/api/packages/install', async (req, res) => {
+    const { projectPath } = req.body;
+    if (!projectPath) return res.status(400).json({ status: "error", message: "مسار المشروع مطلوب." });
+    const pm = new PackageManager();
+    const result = await pm.install(projectPath);
+    res.json(result);
+});
+
+app.post('/api/packages/add', async (req, res) => {
+    const { projectPath, packageName, version } = req.body;
+    if (!projectPath || !packageName) return res.status(400).json({ status: "error", message: "المسار واسم الحزمة مطلوبان." });
+    const pm = new PackageManager();
+    const result = await pm.addPackage(projectPath, packageName, version);
+    res.json(result);
+});
+
+app.post('/api/packages/remove', async (req, res) => {
+    const { projectPath, packageName } = req.body;
+    const pm = new PackageManager();
+    const result = await pm.removePackage(projectPath, packageName);
+    res.json(result);
+});
+
+app.post('/api/packages/analyze', (req, res) => {
+    const { projectPath } = req.body;
+    if (!projectPath) return res.status(400).json({ status: "error", message: "مسار المشروع مطلوب." });
+    const pm = new PackageManager();
+    const result = pm.analyzeDependencies(projectPath);
+    res.json(result);
+});
+
+app.get('/api/packages/supported', (req, res) => {
+    const pm = new PackageManager();
+    res.json({ status: "success", languages: pm.getSupportedLanguages() });
+});
+
+// ========== جدولة المهام ==========
+app.post('/api/tasks/schedule', async (req, res) => {
+    const { projectPath, scripts } = req.body;
+    if (!projectPath || !scripts) return res.status(400).json({ status: "error", message: "المسار والسكريبتات مطلوبة." });
+    
+    const orchestrator = new TaskOrchestrator();
+    const result = await orchestrator.runParallel(projectPath, scripts);
+    res.json({ status: "completed", results: result });
+});
+
+app.post('/api/tasks/setup-and-run', async (req, res) => {
+    const { projectPath, scriptName } = req.body;
+    if (!projectPath) return res.status(400).json({ status: "error", message: "مسار المشروع مطلوب." });
+    
+    const orchestrator = new TaskOrchestrator();
+    const result = await orchestrator.setupAndRun(projectPath, scriptName);
+    res.json(result);
+});
+
+app.get('/api/tasks/status', (req, res) => {
+    const orchestrator = new TaskOrchestrator();
+    res.json({ status: "success", ...orchestrator.getStatus() });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
