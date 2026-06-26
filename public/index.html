@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreFlow - وكيل استراتيجي</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #111;
+            border-bottom: 1px solid #222;
+            padding: 16px 24px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+        .header span { color: #4ade80; }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-section label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        #goalInput {
+            width: 100%;
+            padding: 14px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        #goalInput:focus {
+            outline: none;
+            border-color: #4ade80;
+        }
+        #executeBtn {
+            padding: 14px 32px;
+            background: #4ade80;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            align-self: flex-start;
+        }
+        #executeBtn:hover { background: #22c55e; }
+        #executeBtn:active { transform: scale(0.97); }
+        #executeBtn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .panel {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .panel h2 {
+            font-size: 1rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #consoleOutput {
+            background: #000;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #ccc;
+            min-height: 150px;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-info { color: #60a5fa; }
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .file-badge {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 80px;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 0.75rem; color: #888; }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .header h1 { font-size: 1.2rem; }
+            .stats-row { gap: 8px; }
+            .stat { padding: 8px 12px; min-width: 60px; }
+            .stat-value { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span>◈</span> CoreFlow</h1>
+    </div>
+    <div class="container">
+        <div class="input-section">
+            <label for="goalInput">🎯 أدخل هدفك</label>
+            <textarea id="goalInput" placeholder="مثال: أنشئ لي تطبيق ويب بسيط للتذكير بالمهام باستخدام React..."></textarea>
+            <button id="executeBtn" onclick="executeGoal()">🚀 تنفيذ</button>
+        </div>
+
+        <div class="panel" id="strategyPanel" style="display:none;">
+            <h2>📋 الخطة والاستراتيجية</h2>
+            <div id="strategyContent"></div>
+        </div>
+
+        <div class="panel">
+            <h2>🖥️ سجل التنفيذ</h2>
+            <div id="consoleOutput">في انتظار إدخال الهدف...</div>
+        </div>
+
+        <div class="panel" id="filesPanel" style="display:none;">
+            <h2>📁 الملفات المنشأة</h2>
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <div class="panel" id="statsPanel" style="display:none;">
+            <h2>📊 إحصائيات</h2>
+            <div class="stats-row" id="statsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const consoleOutput = document.getElementById('consoleOutput');
+        const goalInput = document.getElementById('goalInput');
+        const executeBtn = document.getElementById('executeBtn');
+
+        function log(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : 'log-info';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        async function executeGoal() {
+            const goal = goalInput.value.trim();
+            if (!goal) { log('الرجاء إدخال هدف أولاً.', 'error'); return; }
+
+            executeBtn.disabled = true;
+            consoleOutput.innerHTML = '';
+            log('جاري تحليل الهدف...', 'info');
+            log(`الهدف: "${goal}"`, 'info');
+
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal })
+                });
+
+                const result = await response.json();
+                log('✅ تم استلام الرد من النظام.', 'success');
+
+                if (result.status === 'needs_clarification') {
+                    log('⚠️ الهدف يحتاج توضيح:', 'error');
+                    result.questions.forEach(q => log('  ❓ ' + q, 'error'));
+                } else if (result.status === 'completed') {
+                    log(`📋 نوع المشروع: ${result.projectType}`, 'info');
+                    log(`🧠 الاستراتيجية: ${result.strategy}`, 'info');
+                    log(`📁 اسم المشروع: ${result.projectName}`, 'info');
+                    log('---', 'info');
+                    log(`✅ اكتمل: ${result.completedSteps}/${result.totalSteps}`, 'success');
+                    if (result.failedSteps > 0) log(`❌ فشل: ${result.failedSteps}`, 'error');
+
+                    if (result.results) {
+                        result.results.forEach(r => {
+                            const icon = r.result.status === 'success' ? '✅' : '❌';
+                            log(`${icon} ${r.description}`, r.result.status === 'success' ? 'success' : 'error');
+                        });
+                    }
+
+                    if (result.results) {
+                        const filesPanel = document.getElementById('filesPanel');
+                        const fileList = document.getElementById('fileList');
+                        fileList.innerHTML = '';
+                        result.results.filter(r => r.path).forEach(r => {
+                            const badge = document.createElement('span');
+                            badge.className = 'file-badge';
+                            badge.textContent = r.path;
+                            fileList.appendChild(badge);
+                        });
+                        if (fileList.children.length > 0) filesPanel.style.display = 'flex';
+                    }
+
+                    if (result.stats) {
+                        const statsPanel = document.getElementById('statsPanel');
+                        const statsContent = document.getElementById('statsContent');
+                        statsContent.innerHTML = `
+                            <div class="stat"><div class="stat-value">${result.stats.total}</div><div class="stat-label">إجمالي</div></div>
+                            <div class="stat"><div class="stat-value">${result.stats.success}</div><div class="stat-label">ناجح</div></div>
+                            <div class="stat"><div class="stat-value">${result.stats.error}</div><div class="stat-label">فاشل</div></div>
+                            <div class="stat"><div class="stat-value">${Math.round(result.stats.avgDuration)}ms</div><div class="stat-label">متوسط الزمن</div></div>
+                        `;
+                        statsPanel.style.display = 'flex';
+                    }
+
+                    log('🏁 تم الانتهاء.', 'success');
+                }
+            } catch (error) {
+                log('❌ فشل الاتصال بالخادم: ' + error.message, 'error');
+            } finally {
+                executeBtn.disabled = false;
+            }
+        }
+
+        goalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) executeGoal();
+        });
+
+        log('النظام جاهز. أدخل هدفك واضغط "تنفيذ".', 'info');
+    </script>
+</body>
+</html>

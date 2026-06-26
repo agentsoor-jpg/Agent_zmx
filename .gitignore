@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+node_modules
+.env
+logs/*
+workspace_run/*
+git.js
+run_tests_phase5.js
+run_tests_phase6.js
+run_test.js

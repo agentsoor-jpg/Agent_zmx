@@ -1,0 +1,6 @@
+{
+  "name": "Giant Maker",
+  "description": "A GitHub imported project: agentsoor-jpg/giant_maker",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
