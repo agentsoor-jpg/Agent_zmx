@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const strategicController = require('./src/control/StrategicController');
 const ChaosEngine = require('./src/testing/ChaosEngine');
+const UniversalFileManager = require('./src/universal/UniversalFileManager');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +67,90 @@ app.post('/api/chaos-test', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// مدير الملفات العالمي - استقبال
+app.post('/api/universal/ingest', async (req, res) => {
+    try {
+        const { source, targetName } = req.body;
+        if (!source) {
+            return res.status(400).json({ status: "error", message: "المصدر مطلوب." });
+        }
+        const ufm = new UniversalFileManager();
+        const result = await ufm.ingest(source, { targetName });
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ status: "error", error: error.message });
+    }
+});
+
+// مدير الملفات العالمي - ضغط
+app.post('/api/universal/compress', async (req, res) => {
+    try {
+        const { sourceDir, format } = req.body;
+        if (!sourceDir) {
+            return res.status(400).json({ status: "error", message: "مسار المصدر مطلوب." });
+        }
+        const ufm = new UniversalFileManager();
+        const result = await ufm.compress(sourceDir, format || 'zip');
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ status: "error", error: error.message });
+    }
+});
+
+// مدير الملفات العالمي - فك ضغط
+app.post('/api/universal/extract', async (req, res) => {
+    try {
+        const { filePath, outputDir } = req.body;
+        if (!filePath) {
+            return res.status(400).json({ status: "error", message: "مسار الملف مطلوب." });
+        }
+        const ufm = new UniversalFileManager();
+        const result = await ufm.extract(filePath, outputDir);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ status: "error", error: error.message });
+    }
+});
+
+// مدير الملفات العالمي - إرسال
+app.post('/api/universal/deliver', async (req, res) => {
+    try {
+        const { sourcePath, destination, branch, message } = req.body;
+        if (!sourcePath || !destination) {
+            return res.status(400).json({ status: "error", message: "المصدر والوجهة مطلوبان." });
+        }
+        const ufm = new UniversalFileManager();
+        const result = await ufm.deliver(sourcePath, destination, { branch, message });
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ status: "error", error: error.message });
+    }
+});
+
+// مدير الملفات العالمي - خط أنابيب كامل
+app.post('/api/universal/pipeline', async (req, res) => {
+    try {
+        const options = req.body;
+        if (!options.source) {
+            return res.status(400).json({ status: "error", message: "المصدر مطلوب." });
+        }
+        const ufm = new UniversalFileManager();
+        const result = await ufm.fullPipeline(options);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ status: "error", error: error.message });
+    }
+});
+
+// مدير الملفات العالمي - القدرات
+app.get('/api/universal/capabilities', (req, res) => {
+    const ufm = new UniversalFileManager();
+    res.json({
+        status: "success",
+        capabilities: ufm.getCapabilities()
+    });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
