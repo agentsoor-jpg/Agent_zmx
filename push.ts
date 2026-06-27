@@ -16,7 +16,7 @@ try {
   execSync('git config user.email "bot@example.com"', { stdio: 'inherit' });
   execSync('git config user.name "AI Bot"', { stdio: 'inherit' });
   
-  execSync('git commit -m "CoreFlow v3.0: Complete Autonomous Engineering OS - Massive Projects, Self-Testing, Production Ready" || true', { stdio: 'inherit' });
+  execSync('git commit -m "CRITICAL FIX: Remove type:module and postinstall from package.json" || true', { stdio: 'inherit' });
   
   // const token = process.env.GITHUB_TOKEN;
   // if (!token) {
