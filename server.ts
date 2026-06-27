@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import { ControlSystem } from './src/core/ControlSystem';
 import { SelfImprovementSystem } from './src/core/SelfImprovementSystem';
@@ -25,6 +26,7 @@ async function startServer() {
   const PORT = process.env.PORT || 3000;
 
   app.use(express.json());
+  app.use(cors());
 
   const controlSystem = new ControlSystem();
   const selfImprovement = new SelfImprovementSystem(controlSystem);
@@ -45,9 +47,11 @@ async function startServer() {
       return res.status(429).json(APIStandard.error('Too many requests. System protection active.', 429));
     }
     
-    // Auth for execution endpoints
+    // المصادقة اختيارية - تفعّل فقط عند REQUIRE_AUTH=true
     if (req.path.startsWith('/api/v1/meta') && process.env.NODE_ENV === 'production') {
-       return AuthMiddleware.validate(req, res, next);
+       if (process.env.REQUIRE_AUTH === 'true') {
+         return AuthMiddleware.validate(req, res, next);
+       }
     }
     next();
   });

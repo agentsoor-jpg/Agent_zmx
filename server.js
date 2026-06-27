@@ -64,6 +64,7 @@ var init_IntegrityChecker = __esm({
 // server.ts
 var import_express = __toESM(require("express"));
 var import_path8 = __toESM(require("path"));
+var import_cors = __toESM(require("cors"));
 var import_vite = require("vite");
 
 // src/core/ExecutionEngine.ts
@@ -2815,6 +2816,7 @@ async function startServer() {
   const app = (0, import_express.default)();
   const PORT = process.env.PORT || 3e3;
   app.use(import_express.default.json());
+  app.use((0, import_cors.default)());
   const controlSystem = new ControlSystem();
   const selfImprovement = new SelfImprovementSystem(controlSystem);
   const hardTest = new HardTestSystem(selfImprovement);
@@ -2831,7 +2833,9 @@ async function startServer() {
       return res.status(429).json(APIStandard.error("Too many requests. System protection active.", 429));
     }
     if (req.path.startsWith("/api/v1/meta") && process.env.NODE_ENV === "production") {
-      return AuthMiddleware.validate(req, res, next);
+      if (process.env.REQUIRE_AUTH === "true") {
+        return AuthMiddleware.validate(req, res, next);
+      }
     }
     next();
   });
