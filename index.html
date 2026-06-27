@@ -1,13 +1,689 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreFlow - Autonomous Engineering OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a2e;
+            --bg-input: #0d0d1a;
+            --border: #252540;
+            --text-primary: #e8e8f0;
+            --text-secondary: #9090b0;
+            --text-muted: #606078;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --success: #00d2a0;
+            --error: #ff4757;
+            --warning: #ffa502;
+            --info: #3498db;
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(52, 152, 219, 0.03) 0%, transparent 50%);
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header-title span { color: var(--accent-light); }
+        .header-badge {
+            font-size: 0.7rem;
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--success); }
+            50% { opacity: 0.5; box-shadow: 0 0 2px var(--success); }
+        }
+
+        /* ===== Layout ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ===== Cards ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .card:hover { border-color: #303058; }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+        .card-icon {
+            font-size: 1.2rem;
+        }
+
+        /* ===== Input Section ===== */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .goal-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            resize: vertical;
+            min-height: 100px;
+            transition: var(--transition);
+            line-height: 1.8;
+        }
+        .goal-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .goal-input::placeholder { color: var(--text-muted); }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(108, 92, 231, 0.5); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-light); }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ===== Console ===== */
+        .console {
+            background: #050510;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            max-height: 450px;
+            overflow-y: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        .console-line {
+            padding: 3px 0;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+        .console-time {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+        .console-msg { word-break: break-all; }
+        .console-success { color: var(--success); }
+        .console-error { color: var(--error); }
+        .console-warning { color: var(--warning); }
+        .console-info { color: var(--info); }
+        .console-muted { color: var(--text-muted); }
+
+        /* ===== Grid ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        /* ===== Stats ===== */
+        .stat-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .stat-value.success { color: var(--success); }
+        .stat-value.error { color: var(--error); }
+        .stat-value.accent { color: var(--accent-light); }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* ===== File Tags ===== */
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .tag {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.78rem;
+            font-family: monospace;
+            color: var(--text-secondary);
+            direction: ltr;
+            display: inline-block;
+        }
+        .tag:hover { border-color: var(--accent); color: var(--text-primary); }
+
+        /* ===== Progress ===== */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* ===== Tabs ===== */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: var(--transition);
+        }
+        .tab-btn.active {
+            color: var(--accent-light);
+            border-bottom-color: var(--accent);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .container { padding: 16px 12px; }
+            .header { padding: 10px 16px; }
+            .header-title { font-size: 1rem; }
+            .card { padding: 16px; }
+        }
+        @media (max-width: 500px) {
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+            .btn { padding: 10px 16px; font-size: 0.85rem; }
+            .button-row { flex-direction: column; }
+            .button-row .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="header-logo">◈</div>
+            <div>
+                <div class="header-title">Core<span>Flow</span></div>
+            </div>
+            <span class="header-badge">v3.0</span>
+        </div>
+        <div class="header-status">
+            <span class="status-dot"></span>
+            <span id="headerStatus">جاهز</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Input Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🎯</span>
+                <h2>ماذا تريد أن تبني اليوم؟</h2>
+            </div>
+            <div class="input-section">
+                <textarea class="goal-input" id="goalInput" 
+                    placeholder="اكتب هدفك هنا... مثلاً: أنشئ لي تطبيق ويب متكامل للتجارة الإلكترونية بواجهة أمامية وخلفية وقاعدة بيانات..."></textarea>
+                <div class="button-row">
+                    <button class="btn btn-primary" id="executeBtn" onclick="executeGoal()">
+                        🚀 تنفيذ
+                    </button>
+                    <button class="btn btn-outline" onclick="analyzeFirst()">
+                        🔍 تحليل أولاً
+                    </button>
+                    <button class="btn btn-danger btn-sm" id="chaosBtn" onclick="runChaosTests()">
+                        🔥 اختبار التعذيب
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="runSelfTest()">
+                        🧪 اختبار ذاتي
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('console')">🖥️ سجل التنفيذ</button>
+                <button class="tab-btn" onclick="switchTab('files')">📁 الملفات</button>
+                <button class="tab-btn" onclick="switchTab('stats')">📊 الإحصائيات</button>
+                <button class="tab-btn" onclick="switchTab('system')">🌍 حالة النظام</button>
+            </div>
+
+            <!-- Console Tab -->
+            <div class="tab-content active" id="tab-console">
+                <div class="console" id="consoleOutput">
+                    <div class="console-line">
+                        <span class="console-time">--:--</span>
+                        <span class="console-msg console-info">أهلاً بك في CoreFlow. أدخل هدفك واضغط "تنفيذ".</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Files Tab -->
+            <div class="tab-content" id="tab-files">
+                <div class="tag-list" id="fileList">
+                    <span class="tag" style="color:var(--text-muted);">لم يتم إنشاء ملفات بعد...</span>
+                </div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div class="tab-content" id="tab-stats">
+                <div class="grid-4" id="statsGrid">
+                    <div class="stat-card"><div class="stat-value">--</div><div class="stat-label">إجمالي الخطوات</div></div>
+                    <div class="stat-card"><div class="stat-value success">--</div><div class="stat-label">ناجح</div></div>
+                    <div class="stat-card"><div class="stat-value error">--</div><div class="stat-label">فاشل</div></div>
+                    <div class="stat-card"><div class="stat-value accent">--</div><div class="stat-label">متوسط الزمن</div></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+            </div>
+
+            <!-- System Tab -->
+            <div class="tab-content" id="tab-system">
+                <div class="grid-4" id="systemGrid">
+                    <div class="stat-card"><div class="stat-value" id="sysUptime">--</div><div class="stat-label">وقت التشغيل</div></div>
+                    <div class="stat-card"><div class="stat-value" id="sysRequests">--</div><div class="stat-label">طلبات</div></div>
+                    <div class="stat-card"><div class="stat-value" id="sysMemory">--</div><div class="stat-label">ذاكرة</div></div>
+                    <div class="stat-card"><div class="stat-value success" id="sysStatus">--</div><div class="stat-label">الحالة</div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const consoleOutput = document.getElementById('consoleOutput');
+        const goalInput = document.getElementById('goalInput');
+        const executeBtn = document.getElementById('executeBtn');
+        const chaosBtn = document.getElementById('chaosBtn');
+
+        // ===== Console =====
+        function log(msg, type = 'info') {
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            const now = new Date().toLocaleTimeString('ar-SA');
+            line.innerHTML = `<span class="console-time">${now}</span><span class="console-msg console-${type}">${msg}</span>`;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+
+        // ===== Tabs =====
+        function switchTab(name) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+            document.getElementById(`tab-${name}`).classList.add('active');
+        }
+
+        // ===== Execute Goal =====
+        async function executeGoal() {
+            const goal = goalInput.value.trim();
+            if (!goal) { log('الرجاء إدخال هدف أولاً.', 'error'); return; }
+
+            executeBtn.disabled = true;
+            chaosBtn.disabled = true;
+            clearConsole();
+            log('🎯 بدء تنفيذ الهدف...', 'info');
+            log(`📝 ${goal}`, 'muted');
+
+            try {
+                const res = await fetch('/api/v1/meta/autonomous-os', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal })
+                });
+                const result = await res.json();
+
+                if (result.status === 'needs_clarification') {
+                    log('⚠️ الهدف يحتاج توضيح:', 'warning');
+                    result.questions.forEach(q => log('  ❓ ' + q, 'warning'));
+                } else if (result.status === 'success' || result.status === 'completed') {
+                    const data = result.data || result;
+                    log(`📋 نوع المشروع: ${data.projectType || 'مخصص'}`, 'info');
+                    log(`🧠 الاستراتيجية: ${data.strategy || 'تنفيذ ذاتي'}`, 'info');
+                    log(`✅ ${data.completedSteps || 1}/${data.totalSteps || 1} خطوات ناجحة`, 'success');
+                    if (data.failedSteps > 0) log(`❌ ${data.failedSteps} خطوات فاشلة`, 'error');
+
+                    if (data.results) {
+                        data.results.forEach(r => {
+                            const icon = r.result?.status === 'success' ? '✅' : '❌';
+                            const type = r.result?.status === 'success' ? 'success' : 'error';
+                            log(`${icon} ${r.description || r.step || r.action}`, type);
+                        });
+                    }
+
+                    // Update stats
+                    if (data.stats) {
+                        document.getElementById('statsGrid').innerHTML = `
+                            <div class="stat-card"><div class="stat-value">${data.stats.total}</div><div class="stat-label">إجمالي</div></div>
+                            <div class="stat-card"><div class="stat-value success">${data.stats.success}</div><div class="stat-label">ناجح</div></div>
+                            <div class="stat-card"><div class="stat-value error">${data.stats.error}</div><div class="stat-label">فاشل</div></div>
+                            <div class="stat-card"><div class="stat-value accent">${Math.round(data.stats.avgDuration || 0)}ms</div><div class="stat-label">متوسط الزمن</div></div>
+                        `;
+                        document.getElementById('progressFill').style.width = 
+                            data.totalSteps > 0 ? `${(data.completedSteps/data.totalSteps)*100}%` : '100%';
+                    }
+
+                    log('🏁 تم الانتهاء.', 'success');
+                } else {
+                    log('❌ ' + JSON.stringify(result), 'error');
+                }
+            } catch (e) {
+                log('❌ فشل الاتصال: ' + e.message, 'error');
+            } finally {
+                executeBtn.disabled = false;
+                chaosBtn.disabled = false;
+            }
+        }
+
+        // ===== Analyze First =====
+        async function analyzeFirst() {
+            const goal = goalInput.value.trim();
+            if (!goal) { log('الرجاء إدخال هدف.', 'error'); return; }
+
+            clearConsole();
+            log('🔍 جاري تحليل الهدف...', 'info');
+
+            try {
+                const res = await fetch('/api/massive/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal })
+                });
+                const result = await res.json();
+                
+                if (result.analysis) {
+                    const a = result.analysis;
+                    log(`📊 التعقيد: ${a.complexity}`, 'info');
+                    log(`📁 تقدير الملفات: ${a.estimatedFileCount}+`, 'info');
+                    log(`📝 تقدير الأسطر: ${a.estimatedLineCount}+`, 'info');
+                    log(`📋 الطبقات: ${a.recommendedLayers?.join(', ')}`, 'info');
+                    log(`⏱️ الوقت المقدر: ${a.timeline?.estimatedFormatted}`, 'info');
+                    if (a.riskFactors?.length > 0) {
+                        log('⚠️ المخاطر:', 'warning');
+                        a.riskFactors.forEach(r => log(`  • ${r.risk}: ${r.mitigation}`, 'warning'));
+                    }
+                    log('💡 اضغط "تنفيذ" للبدء في بناء المشروع.', 'success');
+                }
+            } catch (e) {
+                log('❌ فشل: ' + e.message, 'error');
+            }
+        }
+
+        // ===== Chaos Tests =====
+        async function runChaosTests() {
+            chaosBtn.disabled = true;
+            executeBtn.disabled = true;
+            clearConsole();
+            log('🔥 بدء اختبارات التعذيب...', 'error');
+            log('هذا سيختبر النظام بأقصى قسوة.', 'warning');
+
+            try {
+                const res = await fetch('/api/chaos-test', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const result = await res.json();
+                const data = result.data || result;
+                
+                log(`📊 النتيجة: ${data.passed || Object.keys(data).length}/${data.totalTests || Object.keys(data).length} نجح`, 'success');
+                if (data.grade) log(`🏆 التقييم: ${data.grade}`, data.grade?.includes('A') ? 'success' : 'error');
+                if (data.totalDurationSeconds) log(`⏱️ الزمن: ${data.totalDurationSeconds}s`, 'info');
+
+                if (data.results) {
+                    data.results.forEach(r => {
+                        const icon = r.status === 'passed' ? '✅' : r.status === 'crashed' ? '💀' : '❌';
+                        const type = r.status === 'passed' ? 'success' : 'error';
+                        log(`${icon} ${r.testName} (${r.duration ? (r.duration/1000).toFixed(2)+'s' : 'N/A'})`, type);
+                    });
+                } else if (typeof data === 'object') {
+                    for (const [key, value] of Object.entries(data)) {
+                         log(`${value === 'PASS' ? '✅' : '❌'} ${key}`, value === 'PASS' ? 'success' : 'error');
+                    }
+                }
+                log('🏁 انتهى التعذيب.', 'info');
+            } catch (e) {
+                log('💀 فشل: ' + e.message, 'error');
+            } finally {
+                chaosBtn.disabled = false;
+                executeBtn.disabled = false;
+            }
+        }
+
+        // ===== Self Test =====
+        async function runSelfTest() {
+            clearConsole();
+            log('🧪 بدء الاختبار الذاتي...', 'info');
+
+            try {
+                const res = await fetch('/api/test/self', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const result = await res.json();
+                
+                log(`📊 نسبة النجاح: ${result.summary?.passRate}%`, 'info');
+                log(`🏆 التقييم: ${result.summary?.grade}`, result.summary?.grade?.includes('A') ? 'success' : 'error');
+                
+                if (result.suites) {
+                    result.suites.forEach(s => {
+                        log(`📦 ${s.name}: ${s.passed}/${s.total}`, s.failed === 0 ? 'success' : 'warning');
+                    });
+                }
+                log('🏁 انتهى الاختبار الذاتي.', 'info');
+            } catch (e) {
+                log('❌ فشل: ' + e.message, 'error');
+            }
+        }
+
+        // ===== Refresh System Status =====
+        async function refreshStatus() {
+            try {
+                const res = await fetch('/api/health'); // changed to health endpoint
+                const data = await res.json();
+                
+                document.getElementById('headerStatus').textContent = 
+                    data.data?.health === 'HEALTHY' ? 'سليم ✅' : '⚠️';
+                
+                // Assuming `/api/health` returns standard health format
+                document.getElementById('sysUptime').textContent = 'Live';
+                document.getElementById('sysRequests').textContent = data.data?.totalRequests || '--';
+                document.getElementById('sysMemory').textContent = 'OK';
+                document.getElementById('sysStatus').textContent = 
+                    data.data?.health === 'HEALTHY' ? '✅ سليم' : '⚠️';
+            } catch {}
+        }
+
+        function formatUptime(s) {
+            const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
+            return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+        }
+
+        // ===== Shortcuts =====
+        goalInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) executeGoal();
+        });
+
+        // ===== Init =====
+        refreshStatus();
+        setInterval(refreshStatus, 30000);
+
+        log('النظام جاهز. أدخل هدفك واضغط "تنفيذ" أو Ctrl+Enter.', 'success');
+    </script>
+</body>
 </html>
 
