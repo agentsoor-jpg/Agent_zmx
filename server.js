@@ -62,13 +62,13 @@ var init_IntegrityChecker = __esm({
 });
 
 // server.ts
-var import_express = __toESM(require("express"), 1);
-var import_path8 = __toESM(require("path"), 1);
+var import_express = __toESM(require("express"));
+var import_path8 = __toESM(require("path"));
 var import_vite = require("vite");
 
 // src/core/ExecutionEngine.ts
-var import_fs = __toESM(require("fs"), 1);
-var import_path = __toESM(require("path"), 1);
+var import_fs = __toESM(require("fs"));
+var import_path = __toESM(require("path"));
 var import_child_process = require("child_process");
 var WORKSPACE_DIR = import_path.default.resolve(process.cwd(), "./workspace_run");
 function resolveSafePath(targetPath) {
@@ -193,8 +193,8 @@ var ObservationLayer = class {
 };
 
 // src/core/QualityEngine.ts
-var import_fs2 = __toESM(require("fs"), 1);
-var import_path2 = __toESM(require("path"), 1);
+var import_fs2 = __toESM(require("fs"));
+var import_path2 = __toESM(require("path"));
 var WORKSPACE_DIR2 = import_path2.default.resolve(process.cwd(), "./workspace_run");
 var QualityEngine = class {
   validateFile(targetPath) {
@@ -383,8 +383,8 @@ Suggested by: ${agentName}`
 };
 
 // src/core/ChaosTestSystem.ts
-var import_fs3 = __toESM(require("fs"), 1);
-var import_path3 = __toESM(require("path"), 1);
+var import_fs3 = __toESM(require("fs"));
+var import_path3 = __toESM(require("path"));
 var WORKSPACE_DIR3 = import_path3.default.resolve(process.cwd(), "./workspace_run");
 var ChaosTestSystem = class {
   constructor(controlSystem) {
@@ -1727,8 +1727,8 @@ var SmartErrorAnalyzer = class {
 var SmartErrorAnalyzer_default = SmartErrorAnalyzer;
 
 // src/core/executionEngine.js
-var import_fs4 = __toESM(require("fs"), 1);
-var import_path4 = __toESM(require("path"), 1);
+var import_fs4 = __toESM(require("fs"));
+var import_path4 = __toESM(require("path"));
 var WORKSPACE_DIR4 = import_path4.default.resolve(process.cwd(), "workspace_run");
 function resolveSafePath2(targetPath) {
   return import_path4.default.resolve(WORKSPACE_DIR4, targetPath);
@@ -1774,8 +1774,8 @@ var executionEngine_default = {
 };
 
 // src/testing/SelfTester.js
-var import_fs5 = __toESM(require("fs"), 1);
-var import_path5 = __toESM(require("path"), 1);
+var import_fs5 = __toESM(require("fs"));
+var import_path5 = __toESM(require("path"));
 var WORKSPACE_DIR5 = import_path5.default.resolve(process.cwd(), "workspace_run");
 var SelfTester = class {
   constructor() {
@@ -1988,8 +1988,8 @@ var SelfTester = class {
 var SelfTester_default = SelfTester;
 
 // src/testing/AutoFixer.js
-var import_fs6 = __toESM(require("fs"), 1);
-var import_path6 = __toESM(require("path"), 1);
+var import_fs6 = __toESM(require("fs"));
+var import_path6 = __toESM(require("path"));
 var import_child_process2 = require("child_process");
 var WORKSPACE_DIR6 = import_path6.default.resolve(process.cwd(), "workspace_run");
 var AutoFixer = class {
@@ -2450,7 +2450,7 @@ var MassiveProjectAnalyzer = class {
 
 // src/massive/MassiveProjectBuilder.js
 init_observer();
-var import_path7 = __toESM(require("path"), 1);
+var import_path7 = __toESM(require("path"));
 var WORKSPACE_DIR7 = import_path7.default.resolve(process.cwd(), "workspace_run");
 var MassiveProjectBuilder = class {
   constructor() {
@@ -2981,7 +2981,7 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = import_path8.default.join(process.cwd(), "dist");
+    const distPath = import_path8.default.join(process.cwd(), "public");
     app.use(import_express.default.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(import_path8.default.join(distPath, "index.html"));

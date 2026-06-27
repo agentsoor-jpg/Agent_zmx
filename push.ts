@@ -16,7 +16,7 @@ try {
   execSync('git config user.email "bot@example.com"', { stdio: 'inherit' });
   execSync('git config user.name "AI Bot"', { stdio: 'inherit' });
   
-  execSync('git commit -m "CRITICAL FIX: Remove type:module and postinstall from package.json" || true', { stdio: 'inherit' });
+  execSync('git commit -m "Fix: Serve from public/ instead of dist/" || true', { stdio: 'inherit' });
   
   // const token = process.env.GITHUB_TOKEN;
   // if (!token) {
