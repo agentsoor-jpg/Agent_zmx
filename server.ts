@@ -14,6 +14,12 @@ import { AuthMiddleware } from './src/core/AuthMiddleware';
 import { RateLimiter } from './src/core/RateLimiter';
 import { Observability } from './src/core/Observability';
 
+import SelfTester from './src/testing/SelfTester.js';
+import AutoFixer from './src/testing/AutoFixer.js';
+import SmartErrorAnalyzer from './src/testing/SmartErrorAnalyzer.js';
+import MassiveProjectAnalyzer from './src/massive/MassiveProjectAnalyzer.js';
+import MassiveProjectBuilder from './src/massive/MassiveProjectBuilder.js';
+
 async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 3000;
@@ -75,6 +81,10 @@ async function startServer() {
     const result = await chaosTest.runAllTests();
     res.json(APIStandard.success(result));
   }));
+  app.post('/api/chaos-test', withObservability(async (req: any, res: any) => {
+    const result = await chaosTest.runAllTests();
+    res.json(APIStandard.success(result));
+  }));
 
   app.post('/api/v1/meta/agent', withObservability(async (req: any, res: any) => {
     const { goal, agentName } = req.body;
@@ -113,6 +123,98 @@ async function startServer() {
 
   app.get('/api/v1/health', (req, res) => {
     res.json(APIStandard.success(observability.getMetrics()));
+  });
+  app.get('/api/health', (req, res) => {
+    res.json(APIStandard.success(observability.getMetrics()));
+  });
+
+  // ========== الاختبار الذاتي ==========
+  app.post('/api/test/self', async (req, res) => {
+      try {
+          const tester = new SelfTester();
+          const report = await tester.testAll();
+          res.json({ status: "completed", ...report });
+      } catch (error: any) {
+          res.status(500).json({ status: "error", error: error.message });
+      }
+  });
+
+  app.post('/api/test/fix', async (req, res) => {
+      try {
+          const fixer = new AutoFixer();
+          const result = await fixer.fixAndRetest(2);
+          res.json({ status: "completed", ...result });
+      } catch (error: any) {
+          res.status(500).json({ status: "error", error: error.message });
+      }
+  });
+
+  app.post('/api/test/analyze-error', (req, res) => {
+      const { error, context } = req.body;
+      if (!error) return res.status(400).json({ status: "error", message: "نص الخطأ مطلوب." });
+      
+      const analyzer = new SmartErrorAnalyzer();
+      const analysis = analyzer.analyze(error, context || {});
+      res.json({ status: "completed", analysis });
+  });
+
+  app.get('/api/test/stats', (req, res) => {
+      const fixer = new AutoFixer();
+      const analyzer = new SmartErrorAnalyzer();
+      res.json({
+          status: "success",
+          fixStats: fixer.getStats(),
+          analysisStats: analyzer.getStats()
+      });
+  });
+
+  app.post('/api/test/predict', (req, res) => {
+      const { code, language } = req.body;
+      if (!code) return res.status(400).json({ status: "error", message: "الكود مطلوب." });
+      
+      const analyzer = new SmartErrorAnalyzer();
+      const warnings = analyzer.predictIssues(code, language || 'javascript');
+      res.json({ status: "completed", warnings, totalWarnings: warnings.length });
+  });
+
+  // ========== المشاريع العملاقة ==========
+  app.post('/api/massive/analyze', (req, res) => {
+      const { goal } = req.body;
+      if (!goal) return res.status(400).json({ status: "error", message: "الهدف مطلوب." });
+      
+      const analyzer = new MassiveProjectAnalyzer();
+      const analysis = analyzer.analyze(goal);
+      res.json({ status: "success", analysis });
+  });
+
+  app.post('/api/massive/plan', (req, res) => {
+      const { goal } = req.body;
+      if (!goal) return res.status(400).json({ status: "error", message: "الهدف مطلوب." });
+      
+      const analyzer = new MassiveProjectAnalyzer();
+      const plan = analyzer.generateBuildPlan(goal);
+      res.json({ status: "success", plan });
+  });
+
+  app.post('/api/massive/build', async (req, res) => {
+      const { goal, options } = req.body;
+      if (!goal) return res.status(400).json({ status: "error", message: "الهدف مطلوب." });
+      
+      try {
+          const builder = new MassiveProjectBuilder();
+          const result = await builder.build(goal, options || {});
+          res.json(result);
+      } catch (error: any) {
+          res.status(500).json({ status: "error", error: error.message });
+      }
+  });
+
+  app.get('/api/massive/capabilities', (req, res) => {
+      const analyzer = new MassiveProjectAnalyzer();
+      res.json({
+          status: "success",
+          capabilities: analyzer.getCapabilities()
+      });
   });
 
   if (process.env.NODE_ENV !== 'production') {
